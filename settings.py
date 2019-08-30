@@ -3,21 +3,17 @@
 
 """ Settings """
 
+
 # MySQL informations
 
-USERNAME = ""
+USERNAME = "root"
 PASSWORD = ""
-HOST = ""
+HOST = "localhost"
+DATABASE = "Pur_beurre_01072019JJ"
 
 # Categories
 
-SEARCH_1 = "Thé"
+SEARCH_1 = "Fromages"
 SEARCH_2 = "Gâteaux"
-SEARCH_3 = "Céréales"
-SEARCH_4 = "Jus de fruits"
-SEARCH_5 = "Confitures"
-
-# "Advanced" options
-
-DETAILS = True
+SEARCH_3 = "Jus de fruits"
 

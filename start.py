@@ -1,141 +1,32 @@
 #! /usr/bin/env python3
 # coding: UTF-8
 
-import sys
 
 import json
 import requests
-import random
+
 import mysql.connector
 
-import sett as st
+import settings as st
+import database as db
 
 
-class MyDatabase:
+class Application:
     """ Main class """
     def __init__(self):
         """ Initialize """
-        self.details = st.DETAILS
-        self.my_categories = [st.SEARCH_1, st.SEARCH_2, st.SEARCH_3, st.SEARCH_4, st.SEARCH_5]
+        self.database = db.MyDatabase()
 
-        # connection MySQL
-        self.connection()
+        self.my_categories = [st.SEARCH_1, st.SEARCH_2, st.SEARCH_3]
 
-        # database creation
-        self.make_database()
+        start = self.database.first_connection()
 
-        # requests on API
-        self.my_requests()
+        if not start:
+            self.database.create_database()
+            self.my_requests()
 
-    def connection(self):
-        try:
-            self.connection = mysql.connector.connect(user=st.USERNAME, password=st.PASSWORD, host=st.HOST)
-            if self.connection.is_connected():
-                self.cursor = self.connection.cursor()
-
-                if self.details:
-                    server_info = self.connection.get_server_info()
-                    print("Connecté... MySQL Server version : ", server_info)
-
-        except Error as e:
-            print ("Erreur pendant la connection : ", e)
-
-    def make_database(self):
-        with open("script.sql", "r") as file:
-            base2 = file.read()
-            results = self.cursor.execute(base2, multi=True)
-            try:
-                for result in results:
-                    pass
-            except Exception as e:
-                pass
-
-    def insert_category(self, category):
-        self.cursor.execute("USE Database_test;")
-        insert = "INSERT IGNORE INTO Category (category) VALUES (%s)"
-        self.cursor.execute(insert, (category, ))
-        self.connection.commit()
-        if self.details:
-            print("\nLa catégorie :", category, "a été ajoutée avec succès.")
-
-    def insert_food(self, product_name, ingredients, category, store_tags, url):
-        self.cursor.execute("USE Database_test;")
-        insert = "INSERT IGNORE INTO Food (name_food, description, category, store, url) VALUES (%s, %s, %s, %s, %s)"
-        values = (product_name, ingredients, category, store_tags, url)
-        self.cursor.execute(insert, values)
-        self.connection.commit()
-        if self.details:
-            print("L'aliment :", product_name, "a été ajouté avec succès.")
-
-    def all_categories(self):
-        self.cursor.execute("USE Database_test;")
-        #self.cursor.execute("""SELECT id, name_food FROM Food ORDER BY id;""")
-        self.cursor.execute("SELECT id, category FROM Category ORDER BY id;")
-        _all = self.cursor.fetchall()
-        for _id, _name in _all:
-            print("[", _id, "] -", _name)
-
-    def products_list(self, category_id):
-        _list = []
-        self.cursor.execute("USE Database_test;")
-
-        self.cursor.execute("SELECT category FROM Category WHERE id = {};".format(category_id))
-        _category = self.cursor.fetchone()
-        print("\nVoici les aliments de la catégorie :", _category[0])
-
-        self.cursor.execute("SELECT id, name_food FROM Food WHERE category = '{}';".format(_category[0]))
-        _all = self.cursor.fetchall()
-        for _id, _name in _all:
-            _list.append(str(_id))
-            print("[", _id, "] -", _name)
-
-        return _list
-
-    def proposition(self, id_food, choice):
-        self.cursor.execute("USE Database_test;")
-        self.cursor.execute("SELECT name_food FROM Food WHERE id = {};".format(choice))
-        _food = self.cursor.fetchone()
-        print (_food[0],"peut être remplacé par l\'aliment suivant : \n")
-
-        self.cursor.execute("SELECT name_food, description, store, url FROM Food WHERE id = {};".format(id_food))
-        _food = self.cursor.fetchone()
-        print (_food[0])
-        print ("Description :",_food[1])
-        print ("Magasin :",_food[2])
-        print ("Lien :",_food[3])
-
-
-
-    def my_requests(self):
-        """ Requests GET on API """
-        for category in self.my_categories:
-            self.insert_category(category)
-
-            my_research = requests.get(
-                "https://fr.openfoodfacts.org/cgi/search.pl?search_terms={}&search_tag=categories"
-                "&sort_by=unique_scans_n&page_size=20&json=1".format(category))
-
-            results = my_research.json()
-            products = results["products"]
-            
-            for product in products:
-                product_name = product["product_name_fr"]
-                ingredients = product["ingredients_text"]
-                store = product["stores_tags"]
-                store_tags = "\'"+", ".join(product['stores_tags']).replace("'", "")+"\'"
-                url = product["url"]
-                self.insert_food(product_name, ingredients, category, store_tags, url)
-
-
-
-
-                
-class MyApplication:
-    """ Main class """
-    def __init__(self):
-        """ Initialize """
-        self._db = MyDatabase()
         self.start_menu()
+
 
     def start_menu(self):
         print ("\nMENU > Entrer le chiffre correspondant à votre choix. ")
@@ -144,57 +35,106 @@ class MyApplication:
 
         choice = input("\nVotre choix : ")
         if str(choice) == "1":
-            self._db.all_categories()
-            self.category_menu()
+            categories = self.database.show_categories()
+            self.category_menu(categories)
 
         elif str(choice) == "2":
-            pass
+            self.save_product_menu()
+            self.start_menu()
 
-    def category_menu(self):
-        choice = input("\nLe numéro de la catégorie : ")
-        if str(choice) == "1":
-            _list = self._db.products_list(choice)
-            self.select_food_menu(_list)
-        elif str(choice) == "2":
-            _list = self._db.products_list(choice)
-            self.select_food_menu()
-        elif str(choice) == "3":
-            _list = self._db.products_list(choice)
-            self.select_food_menu()
-        elif str(choice) == "4":
-            _list = self._db.products_list(choice)
-            self.select_food_menu()
-        elif str(choice) == "5":
-            _list = self._db.products_list(choice)
-            self.select_food_menu()
         else:
-            print("Erreur : Entrer un numéro")
-            self.category_menu()
+            print ("Erreur : Entrer un numéro valide.")
+            self.start_menu()
 
-    def select_food_menu(self, list_of):
-        choice = input("\nLe numéro de l'aliment : ")
-        if choice in list_of:
-            print("Oui : ", choice)
-            list_of.remove(choice)
-
-            new = random.sample(list_of, 1)
-            print("new : ", new[0])
-            print(list_of)
-            list_of.remove(new[0])
-            print(list_of)
+    def category_menu(self, number_of_category):
+        category_choice = input("\nEntrez le numéro de la catégorie : ")
+        if category_choice in number_of_category:
+            products = self.database.show_products(category_choice)
+            self.select_product_menu(products, category_choice)
             
-            self._db.proposition(new[0], choice)
-            
-            self.select_food_menu(list_of)
         else:
-            print("Non")
-            print(choice)
-            print(list_of)
-            self.select_food_menu(list_of)
+            print ("Erreur : Entrer un numéro valide.")
+            self.category_menu(number_of_category)
+
+    def select_product_menu(self, products, category_choice):
+        print(products)
+
+        choice = input("\nEntrez le numéro de l'aliment : ")
+        if choice in products:
+            
+            proposition = self.database.proposition(choice, category_choice)
+            if proposition:
+                self.save_menu(choice, proposition)
+            else:
+                self.select_product_menu(products, category_choice)
+
+        else:
+            print ("Erreur : Entrer un numéro valide.")
+            self.select_product_menu(products, category_choice)
+
+
+    def save_menu(self, product, new_product):
+        print ("\nMENU > Voulez-vous enregistrer cet aliment ? ")
+        print ("\n1 - Oui ")
+        print ("2 - Non, je veux choisir un autre aliment ")
+        print ("3 - Retourner au menu principal ")
+
+        choice = input("\nVotre choix : ")
+        if choice == "1":
+            self.database.save(product, new_product)
+            self.start_menu()
+            
+        elif choice == "2":
+            categories = self.database.show_categories()
+            self.category_menu(categories)
+
+        elif choice == "3":
+            self.start_menu()
+
+        else:
+            print ("Erreur : Entrer un numéro valide.")
+            self.save_menu(product, new_product)
+
+    def save_product_menu(self):
+        self.database.show_new_products()
+
+    def my_requests(self):
+        """ Requests GET on API """
+        for category in self.my_categories:
+            category_id = self.database.insert_category(category)
+
+            i = 0
+            nutriscore = "a"
+            while i != 3:
+                my_research = requests.get(
+                    "https://fr.openfoodfacts.org/cgi/search.pl?search_terms={}&search_tag=categories"
+                    "&sort_by=unique_scans_n&nutrition_grades={}&page_size=6&json=1".format(category, nutriscore))
+
+                results = my_research.json()
+                products = results["products"]
+                
+                try:
+                    for product in products:
+                        product_name = product["product_name_fr"]
+                        ingredients = product["ingredients_text"]
+                        store = str(product['stores_tags']).replace("'", "").replace("[", "").replace("]", "")
+                        url = product["url"]
+                        nutrition_grade = str(product['nutrition_grade_fr']).replace("'", "").replace("[", "").replace("]", "")
+
+                        self.database.insert_food(product_name, ingredients, category_id, store, url, nutrition_grade)
+
+                except KeyError:
+                    continue
+
+                # letter + 1
+                c = ord(nutriscore[0]) + 1
+                nutriscore = chr(c)
+                i += 1
+        self.database.new_connection_close()
 
 
 def main():
-    start = MyApplication()
+    start = Application()
 
 
 if __name__ == "__main__":
