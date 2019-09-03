@@ -2,7 +2,7 @@
 
 ## Objective
 
-Create a program that interacts with a database and offer 
+Create a program that interacts with a database (Open Food Facts) and offer 
 the user a product equivalent or better than the one he has chosen.
 
 ### Documentation
