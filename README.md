@@ -1,22 +1,26 @@
 # API Open Food Facts
 
-## Readme Driven Development
+## Objective
 
-### Description du parcours utilisateur
+Create a program that interacts with a database and offer 
+the user a product equivalent or better than the one he has chosen.
 
-L'utilisateur est sur le terminal. Ce dernier lui affiche les choix suivants :
+### Documentation
 
-1 - Quel aliment souhaitez-vous remplacer ?
-2 - Retrouver mes aliments substitués.
+See the documention on the wiki.
 
-L'utilisateur sélectionne 1. Le programme pose les questions suivantes à l'utilisateur et ce dernier sélectionne les réponses :
+### Requirements
 
-Sélectionnez la catégorie. 
-[Plusieurs propositions associées à un chiffre. L'utilisateur entre le chiffre correspondant et appuie sur entrée]
+```
+pip install -r requirements.txt
+```
 
-Sélectionnez l'aliment.
-[Plusieurs propositions associées à un chiffre. L'utilisateur entre le chiffre correspondant à l'aliment choisi et appuie sur entrée]
+### Start
 
-Le programme propose un substitut, sa description, un magasin ou l'acheter (le cas échéant) et un lien vers la page d'Open Food Facts concernant cet aliment.
+```
+python start.py
+```
 
-L'utilisateur a alors la possibilité d'enregistrer le résultat dans la base de données.
+### Test
+
+Python 3.7 and MySQL 5.7
