@@ -7,6 +7,6 @@
 # MySQL -> Enter your password
 
 USERNAME = "root"
-PASSWORD = ""
+PASSWORD = "mysql27j"
 HOST = "localhost"
 DATABASE = "Pur_beurre_01072019JJ"

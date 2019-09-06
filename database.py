@@ -73,9 +73,7 @@ class MyDatabase:
 
         if self.connection.is_connected():
             self.cursor = self.connection.cursor()
-            print("Connecté !")
 
     def new_connection_close(self):
         """ Disconnection from the database. """
         self.connection.close()
-        print("Déconnecté !")
