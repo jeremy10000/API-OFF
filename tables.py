@@ -23,7 +23,7 @@ class Category(MyDatabase):
             """, (category, ))
         self.connection.commit()
 
-        print("\nLa catégorie", category, "a été ajoutée avec succès.")
+        # print("\nLa catégorie", category, "a été ajoutée avec succès.")
 
         self.cursor.execute("""
             SELECT id
@@ -119,10 +119,11 @@ class Product(MyDatabase):
                                     store, url, nutriscore))
 
             self.connection.commit()
-            print("Ajout :", p_name)
+            # print("Ajout :", p_name)
 
         except mysql.connector.errors.IntegrityError as e:
-            print("Erreur :", e)
+            # print("Erreur :", e)
+            pass
 
     def show_products(self, category_id):
         """ Display the products of a category. """
