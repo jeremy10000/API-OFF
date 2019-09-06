@@ -21,6 +21,7 @@ class RequestsApi(Category, Product):
         """ Make three requests on the API by categories
             (nutriscore A, B and C) """
         self.new_connection()
+        print("Récupération des données de l\'OpenFoodFacts...")
         for category in self.my_categories:
             category_id = self.insert_category(category)
 
