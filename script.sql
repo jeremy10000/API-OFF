@@ -39,4 +39,4 @@ ADD CONSTRAINT fk_category
 FOREIGN KEY (category) REFERENCES Category(id);
 
 ALTER TABLE Save
-ADD UNIQUE nutriscore (id_product);
+ADD UNIQUE ind_nutriscore (id_product, id_new_product);
